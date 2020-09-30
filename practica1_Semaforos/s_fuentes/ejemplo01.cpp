@@ -3,31 +3,73 @@
 // Sistemas concurrentes y Distribuidos.
 // Seminario 1. Programación Multihebra y Semáforos.
 //
-// Ejemplo 1 (ejemplo1.cpp)
-// Puesta en marcha de dos hebras, con finalización errónea.
+// Ejemplos (del 1 - 4) (ejemplo1.cpp)
+// 
+// Se crea funcion de factorial y función que lo asigna a var.global y otra función que lo 
+// asigna por referencia para obtenerlo desde la hebra principal
 //
-// Historial:
-// Creado en Abril de 2017
+// Septiembre 2020
+//
 // -----------------------------------------------------------------------------
+
 
 
 #include <iostream>
 #include <thread>     // declaraciones del tipo {\bf std::thread}
 using namespace std ; // permite acortar la notación
 
-void funcion_hebra_1(  ) // función que va a ejecutar la hebra primera
-{ for( unsigned long i = 0 ; i < 5000 ; i++ )
-     cout << "hebra 1, i == " << i << endl << flush ;
+//VARIABLES BLOBALES
+long global_1 , global_2;
+
+//Hebras
+thread hebra_1, hebra_2 , hebra_3 , hebra_4; 
+
+/*
+  *Funcion que devuelve el factorial de un entero
+*/
+long factorial(int n){
+  return (n<=0) ?  1 : (n * factorial(n-1) ) ;
 }
-void funcion_hebra_2(  )  // función que va a ejecutar la hebra segunda
-{  for( unsigned long i = 0 ; i < 5000 ; i++ )
-      cout << "                hebra 2, i == " << i << endl << flush ;
+
+/*
+  * Funcion que ejecutará la hebra 1 , asigna el factorial a una var.global
+*/
+void funcion_hebra_1_global(int num1){
+  global_1 = factorial(num1);
 }
+
+/*
+  * Funcion que ejecutará la hebra 2 , asigna el factorial a otra var.global
+*/
+void funcion_hebra_2_global(int num2){
+  global_2 = factorial(num2);
+}
+
+/*
+  * Funcion que asigna al parametro por referencia el factorial 
+*/
+
+void funcion_hebra_referencia(int num , long &result){
+  result = factorial(num);
+}
+
 int main()
 {
-  thread hebra1( funcion_hebra_1 ), // crear {\bf hebra1} ejecutando {\bf funcion\_hebra\_1}
-         hebra2( funcion_hebra_2 ); // crear {\bf hebra2} ejecutando {\bf funcion\_hebra\_2}
+  long resultado , resultado2; //Aqui se almacenan los resultados de la función por referencia
 
-  // finalización errónea: se destruyen los objetos hebra y acaba
-  // la hebra principal, posiblemente antes de que acaben las hebras en ejecución
+  hebra_1 = thread(funcion_hebra_1_global , 5);
+  hebra_2 = thread(funcion_hebra_2_global , 6);
+  hebra_3 = thread(funcion_hebra_referencia , 7 , ref(resultado));
+  hebra_4 = thread(funcion_hebra_referencia , 8 , ref(resultado2));
+
+  hebra_1.join() ; hebra_2.join(); hebra_3.join() ; hebra_4.join();
+
+  cout<<"Factorial de 5 "<<global_1<<endl
+  <<"Factorial de 6 "<<global_2<<endl
+  <<"Factorial de 7 "<<resultado<<endl
+  <<"Factorial de 8 "<<resultado2<<endl;
+  
+
+  
+  return 0;
 }

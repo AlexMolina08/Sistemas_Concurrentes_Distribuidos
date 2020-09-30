@@ -2,37 +2,54 @@
 // Sistemas concurrentes y Distribuidos.
 // Seminario 1. Programación Multihebra y Semáforos.
 //
-// Ejemplo 3 (ejemplo3.cpp)
-// Obtención de resultados mediante variables globales
+// Ejemplo 3  (ejemplo06 y ejemplo07 de las diapositivas del seminario)
+// Creación de un vector de hebras , cada una imprime el factorial de un numero
+// Creación de un vector de futuros
 //
 // Historial:
 // Creado en Abril de 2017
 // -----------------------------------------------------------------------------
 
 #include <iostream>
-#include <future>     // declaracion de {\bf std::thread}, {\bf std::async}, {\bf std::future}
+#include <thread>     // declaracion de {\bf std::thread}, {\bf std::async}, {\bf std::future}
+#include <future>
 using namespace std ; // permite acortar la notación (abc en lugar de std::abc)
+const int num_hebras = 8;
+thread hebras[num_hebras];
+future<long> futuros[num_hebras];
+
+
 
 // declaración de la función {\bf factorial} (parámetro {\bf int}, resultado {\bf long})
 long factorial( int n ) { return n > 0 ? n*factorial(n-1) : 1 ; }
 
-// variables globales donde se escriben los resultados
-long resultado1, resultado2 ;
+void funcion_hebra(int i){
+  long result = factorial(i);
+  cout<<"Hebra "<<i<<" || Factorial: "<<result<<flush<<endl;
+}
 
-// funciones que ejecutan las hebras
-void funcion_hebra_1( int n ) { resultado1 = factorial( n ) ; }
-void funcion_hebra_2( int n ) { resultado2 = factorial( n ) ; }
 
-int main()
-{
-  // iniciar las hebras
-  thread hebra1( funcion_hebra_1, 5  ), // calcula factorial(5) en resultado1
-         hebra2( funcion_hebra_2, 10 ); // calcula factorial(10) en resultado2
+int main(){
 
-  // esperar a que terminen las hebras,
-  hebra1.join() ; hebra2.join() ;
 
-  // imprimir los resultads:
-  cout << "factorial(5)  == " << resultado1 << endl
-       << "factorial(10) == " << resultado2 << endl ;
+  //--- EJECUCION DE VECTOR DE HEBRAS ---
+    cout<<"\n--- vector de futuros ---\n";
+  //Lanzamos todas las hebras de la lista
+  for(int i = 0 ; i < num_hebras ; i++){
+    hebras[i] = thread(funcion_hebra , i);
+  }
+  //Esperamos a que todas terminen 
+  for(int i = 0 ; i < num_hebras ; i++)
+    hebras[i].join();
+
+  // --- EJECUCION VECTOR DE FUTUROS ----
+
+  //--- Lanzamos los futuros
+  cout<<"\n--- vector de futuros ---\n";
+  for(int j = 0 ; j < num_hebras ; ++j)
+    futuros[j] = async (launch::async , factorial , j);
+  //--- obtenemos el resultado de los futuros
+  for(int j = 0 ; j < num_hebras ; ++j)
+    cout<<"Hebra "<<j<<" || Factorial: "<<futuros[j].get()<<flush<<endl;
+  return 0;
 }

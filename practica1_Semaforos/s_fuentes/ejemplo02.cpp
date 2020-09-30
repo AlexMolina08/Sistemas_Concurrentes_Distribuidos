@@ -1,34 +1,29 @@
 // -----------------------------------------------------------------------------
-//
 // Sistemas concurrentes y Distribuidos.
 // Seminario 1. Programación Multihebra y Semáforos.
 //
-// Ejemplo 2 (ejemplo2.cpp)
-// Puesta en marcha de dos hebras, con finalización correcta.
+// Ejemplo 2
+// Obtención de resultados mediante 'return' y la llamada a 'async'
 //
 // Historial:
 // Creado en Abril de 2017
 // -----------------------------------------------------------------------------
 
-
 #include <iostream>
-#include <thread>     // declaraciones del tipo {\bf std::thread}
-using namespace std ; // permite acortar la notación
+#include <future>     // declaracion de {\bf std::thread}, {\bf std::async}, {\bf std::future}
+using namespace std ; // permite acortar la notación (abc en lugar de std::abc)
 
-void funcion_hebra_1(  ) // función que va a ejecutar la hebra primera
-{ for( unsigned long i = 0 ; i < 5000 ; i++ )
-     cout << "hebra 1, i == " << i << endl << flush ;
-}
-void funcion_hebra_2(  )  // función que va a ejecutar la hebra segunda
-{  for( unsigned long i = 0 ; i < 5000 ; i++ )
-      cout << "                hebra 2, i == " << i << endl << flush ;
-}
+// declaración de la función {\bf factorial} (parámetro {\bf int}, resultado {\bf long})
+long factorial( int n ) { return n > 0 ? n*factorial(n-1) : 1 ; }
+
+
+
 int main()
 {
-  thread hebra1( funcion_hebra_1 ), // crear {\bf hebra1} ejecutando {\bf funcion\_hebra\_1}
-         hebra2( funcion_hebra_2 ); // crear {\bf hebra2} ejecutando {\bf funcion\_hebra\_2}
+  
+  future<long> futuro1 = async(launch::async , factorial , 5); 
+  future<long> futuro2 = async(launch::async , factorial , 6);
 
-
-  hebra1.join(); // la hebra principal espera a que {\bf hebra1} termine
-  hebra2.join(); // la hebra principal espera a que {\bf hebra2} termine
+  cout<<"Factorial de 5 "<<futuro1.get()<<endl
+  <<"Factorial de 6 "<<futuro2.get()<<endl;
 }
