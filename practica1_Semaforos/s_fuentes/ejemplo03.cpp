@@ -33,7 +33,7 @@ int main(){
 
 
   //--- EJECUCION DE VECTOR DE HEBRAS ---
-    cout<<"\n--- vector de futuros ---\n";
+    cout<<"\n--- vector de threads ---\n";
   //Lanzamos todas las hebras de la lista
   for(int i = 0 ; i < num_hebras ; i++){
     hebras[i] = thread(funcion_hebra , i);
