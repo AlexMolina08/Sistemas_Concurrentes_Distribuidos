@@ -17,6 +17,7 @@ using namespace std ; // permite acortar la notación (abc en lugar de std::abc)
 const int num_hebras = 8;
 thread hebras[num_hebras];
 future<long> futuros[num_hebras];
+mutex m; //para hacer e.m en el cout
 
 
 
@@ -25,7 +26,9 @@ long factorial( int n ) { return n > 0 ? n*factorial(n-1) : 1 ; }
 
 void funcion_hebra(int i){
   long result = factorial(i);
+  m.lock();
   cout<<"Hebra "<<i<<" || Factorial: "<<result<<flush<<endl;
+  m.unlock();
 }
 
 

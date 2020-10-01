@@ -15,7 +15,7 @@
 #include <thread>
 using namespace std;
 using namespace std::chrono;
-const int n_hebras = 100000;
+const int n_hebras = 10;
 thread hebras[n_hebras];
 
 /*Funcion que devuelve el factorial de un entero*/
@@ -31,7 +31,7 @@ void factorial_hebra(int num){
 
 int main(){
 
-    int factorial_maximo = 100002; //Factorial maximo a calcular
+    int factorial_maximo = 12; //Factorial maximo a calcular
 
     //puntos de inicio y de fin del reloj
     time_point<steady_clock> start_point;
@@ -81,7 +81,7 @@ int main(){
 
 
 
-
+    cout<<endl<<endl<<factorial(400)<<endl;
 
     return 0;
 }
