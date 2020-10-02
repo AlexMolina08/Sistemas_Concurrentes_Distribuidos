@@ -181,5 +181,5 @@ int main()
        << "Tiempo concurrente(threads):\t" << tiempo_conc.count() << " milisegundos. " << endl
        << "Tiempo concurrente(async):\t" << tiempo_conc_future.count() << " milisegundos. " << endl
        << setprecision(4)
-       << "Porcentaje t.conc/t.sec.:\t" << porcatc << "%" << endl;
+       << "Porcentaje t.conc/t.sec.:\t" << porc << "%" << endl;
 }
