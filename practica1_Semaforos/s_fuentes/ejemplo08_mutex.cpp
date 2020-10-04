@@ -2,7 +2,7 @@
 // Sistemas concurrentes y Distribuidos.
 // Seminario 1. Programación Multihebra y Semáforos.
 //
-// Ejemplo 12 (ejemplo12.cpp)
+// Ejemplo 8 (ejemplo08_mutex.cpp)
 // Uso de un objeto mutex para escritura en el terminal en exclusión mutua
 //
 // Historial:
