@@ -2,11 +2,10 @@
 // Sistemas concurrentes y Distribuidos.
 // Seminario 1. Programación Multihebra y Semáforos.
 //
-// Ejemplo 9 (ejemplo09_espera_unica.cpp)
-// Uso de un tipo atómico para incrementos concurrentes de un entero
+// Ejemplo 9 (ejemplo09_exclusion_mutua.cpp)
 //
-// Problema de la espera única ( Productor / Consumidor con una escritura 
-// y una lectura ) 
+// Problema de Productor / Consumidor con una escritura 
+// y una lectura  
 //
 // Queremos evitar la interfolacion L , E (primmero leer , luego escribir)
 // SOLO SE PERMITE LA INTERFOLACIÓN E , L (El productor escribe , 
