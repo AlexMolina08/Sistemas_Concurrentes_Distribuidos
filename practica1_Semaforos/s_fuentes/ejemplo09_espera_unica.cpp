@@ -2,7 +2,7 @@
 // Sistemas concurrentes y Distribuidos.
 // Seminario 1. Programación Multihebra y Semáforos.
 //
-// Ejemplo 6 (ejemplo06_atomicos.cpp)
+// Ejemplo 9 (ejemplo09_espera_unica.cpp)
 // Uso de un tipo atómico para incrementos concurrentes de un entero
 //
 // Problema de la espera única ( Productor / Consumidor con una escritura 
@@ -13,7 +13,7 @@
 //                                           luego el consumidor lee )
 //
 // Por tanto en cualquier estado: 
-//  0 <= #E <= #L
+//  0 <= #E <= #L (el numero de )
 //
 // compilar con : 
 // 
@@ -32,6 +32,7 @@
 #include <random> // dispositivos, generadores y distribuciones aleatorias
 
 using namespace std;
+using namespace SEM;
 
 /*
 * Variable compartida
@@ -43,6 +44,9 @@ int compartida ;
 thread productor ,
        consumidor ;
 
+Semaphore puede_consumir = 0 ,
+          puede_producir = 1; 
+
 
 template< int min, int max > int aleatorio()
 {
@@ -51,26 +55,39 @@ template< int min, int max > int aleatorio()
   return distribucion_uniforme( generador );
 }
 
-int produceValor(){
-    return aleatorio <10 , 100> ();
+int generarValor(){
+    int valor_producido = aleatorio <10 , 100> ();
+    cout<<"Producido : \t"<<valor_producido<<endl;
+    return valor_producido;
 }
 
 void funcion_productor(){
     //var. local para almacenar el valor generado
     int valor;
-    while (true){
-        valor = produceValor(); // #E
+    for (int i = 0 ; i < 10 ; ++i){
+        valor = generarValor(); //genera valor
+        sem_wait(puede_producir); 
         compartida = valor;
-        cout << "Productor produce" << valor << endl;
+        sem_signal(puede_consumir);
     }
 }
 
 void funcion_consumidor(){
     //var. local para almacenar el valor compar
     int valor2;
-    while(true){
-        valor2 =  = compartida;  // #L
-        cout << "\tConsumidor consume" << valor2 << endl;
+    for (int i = 0 ; i < 10 ; ++i){
+        /*
+            *Decrementamos valor semaforo , 
+            *(#L aparece con signo negativo en la expresión #E-#L)
+            *Se tiene que hacer antes de consumir el valor para que
+            *el consumidor espere si es necesario y asi evitar que 
+            *la expresión  #E - #L tome valor negativo
+            *
+        */
+        sem_wait(puede_consumir); 
+        valor2 =  compartida;  // #L (consumir valor)
+        cout << "\tConsumido\t" << valor2 << endl;
+        sem_signal(puede_producir);
     }
 }
 
