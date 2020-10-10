@@ -3,14 +3,17 @@
 // Practica 1. Sincronización de hebras con semáforos.
 //
 // Problema del Productor-Consumidor con semáforos (productor_consumidor.cpp)
-// Solución con semáforos al problema del productor-consumidor
+// Solución con semáforos al problema del productor-consumidor con múltiples
+// productores y consumidores
 //
 //  Cada item producido debe ser leido ( ningún item se pierde )
 //  Ningún item se lee más de una sola vez
 //
 //  
 //  Compilar con:
-//      g++ -o bin/productor_consumidor -pthread -std=c++11 productor_consumidor.cpp Semaphore.cpp -ISemaphore
+//   g++ -o bin/productor_consumidor_multi -pthread 
+//   -std=c++11 productor_consumidor_multi.cpp Semaphore.cpp -ISemaphore
+//
 //
 // Historial:
 // Creado en Octubre de 2020
@@ -26,6 +29,7 @@
 using namespace std ;
 using namespace SEM ;
 
+mutex mtx; 
 
 const int num_items = 10 , //numero de items a generar
           tam_vec = 5;
@@ -66,12 +70,12 @@ template< int min, int max > int aleatorio()
 // en crearlo
 //**********************************************************************
 
-int producir_dato()
+int producir_dato(int productorID)
 {
    static int contador = 0 ;
    this_thread::sleep_for( chrono::milliseconds( aleatorio<20,100>() ));
 
-   cout << "producido: " << contador << endl << flush ;
+   cout << "productor " << productorID << "| producido: " << contador << endl << flush ;
 
    cont_prod[contador] ++ ;
    return contador++ ;
@@ -120,17 +124,20 @@ void test_contadores()
 
 //----------------------------------------------------------------------
 
-void  funcion_hebra_productora()
+void  funcion_hebra_productora(int productorID)
 {
-   for( unsigned i = 0 ; i < num_items ; i++ )
+   for( unsigned i = 0 ; i < num_items / 2 ; i++ )
    {
-      int dato = producir_dato() ;
+   
+      int dato = producir_dato(productorID) ;
       //Paramos la hebra hasta que haya celdas libres en la cola de libres
       //del semaforo
       sem_wait(libres);
       vec[primera_libre] = dato;
       //cout<<"\tPRODUCTOR PRODUCE"<<vec[primera_libre]<<endl<<flush;
+      mtx.lock();
       primera_libre ++ ;
+      mtx.unlock();
       sem_signal(ocupadas);
       //Incrementamos el valor de ocupadas en 1 
 
@@ -158,10 +165,12 @@ void funcion_hebra_consumidora(  )
 
 int main(){
 
-   productor1 = thread(funcion_hebra_productora);
+   productor1 = thread(funcion_hebra_productora , 1);
+   productor2 = thread(funcion_hebra_productora , 2);
    consumidor1 = thread(funcion_hebra_consumidora);
 
    productor1.join();
+   productor2.join();
    consumidor1.join();
 
 
