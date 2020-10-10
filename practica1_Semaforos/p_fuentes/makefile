@@ -1,20 +1,26 @@
+### usar con 'make x01', 'make x02' ..... 'make x12', o 'make xs13'
+
 .SUFFIXES:
-.PHONY: pc
-.PRECIOUS: %_exe
+.PRECIOUS: ejemplo%_exe ejemplo%s_exe
 
-compilador:=g++
+isdarwin   := $(filter Darwin,$(shell uname -s))
+compilador := $(if $(isdarwin), clang++, g++)
+flags      := -std=c++11 -pthread -O3
+BIN = $(shell pwd)/bin
 
-t: test-semaforos_exe
-	./$< | more
 
-pc: prodcons_exe
+
+x%: ejemplo%_exe
+	./$(BIN)/$<
+
+ejemplo%_exe: ejemplo%.cpp
+	$(compilador) $(flags)  -o $(BIN)/$@ $<
+
+xs%: $(BIN)/ejemplo%s_exe
 	./$<
 
-fu: fumadores_exe
-	./$< 
-
-%_exe: %.cpp Semaphore.cpp Semaphore.h
-		$(compilador) -std=c++11 -pthread -o $@ $< Semaphore.cpp
+ejemplo%s_exe: ejemplo%-s.cpp
+		$(compilador) $(flags)  -o $@ $< Semaphore.cpp
 
 clean:
-	rm -f *_exe
+	rm -f $(BIN)/*_exe
