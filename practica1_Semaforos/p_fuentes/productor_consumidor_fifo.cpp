@@ -3,13 +3,13 @@
 // Practica 1. Sincronización de hebras con semáforos.
 //
 // Problema del Productor-Consumidor con semáforos (productor_consumidor.cpp)
-// Solución con semáforos al problema del productor-consumidor
+// Solución FIFO con semáforos al problema del productor-consumidor
 //
 //  Cada item producido debe ser leido ( ningún item se pierde )
 //  Ningún item se lee más de una sola vez
 //  
 //  Compilar con:
-//      g++ -o bin/productor_consumidor -pthread -std=c++11 productor_consumidor.cpp Semaphore.cpp -ISemaphore
+//      g++ -o bin/productor_consumidor_fifo -pthread -std=c++11 productor_consumidor_fifo.cpp Semaphore.cpp -ISemaphore
 //
 // Historial:
 // Creado en Octubre de 2020
@@ -33,16 +33,18 @@ const int num_items = 10 , //numero de items a generar
 
 thread productor1 , consumidor1 ;
 
-//Variable global que nos dice cual es la primera celda libre para producir
+//Variables globales que nos dicen cual es la primera celda libre para producir
 //y cual es la ultima celda en la que se ha producido 
-// (que es la anterior a primera_libre)
-int primera_libre = 0; 
+int primera_libre = 0 , //posicion del productor
+    primera_ocupada = 0; //posicion del consumidor
  
 
 Semaphore libres = tam_vec ,  // tam_vec + #L - #E  , al principio tam_vec
           ocupadas = 0; // #E - #L . al principio 0
 
 int vec[tam_vec] = {0};
+
+mutex pantalla;
 
 //contadores para verificar el programa.
 unsigned  cont_prod[num_items] = {0}, // contadores de verificación: producidos
@@ -124,14 +126,19 @@ void  funcion_hebra_productora()
    for( unsigned i = 0 ; i < num_items ; i++ )
    {
       int dato = producir_dato() ;
+      int aux;
       //Paramos la hebra hasta que haya celdas libres en la cola de libres
       //del semaforo (al inicio entra siempre)
       sem_wait(libres);
-      vec[primera_libre] = dato;
-      cout<<"\tLibres "<<tam_vec - (primera_libre + 1)<<" de "<<tam_vec<<endl<<flush;
+      vec[primera_libre%tam_vec] = dato; // escribe en dato en la primera celda libre
+      //cout<<"\tLibres "<<tam_vec - (primera_libre + 1)<<" de "<<tam_vec<<endl<<flush;
       primera_libre ++ ;
-      sem_signal(ocupadas);
-      //Incrementamos el valor de ocupadas en 1 
+      aux = primera_libre;
+      sem_signal(ocupadas); //Incrementamos el valor de ocupadas en 1 
+
+      pantalla.lock();
+      cout<<"\n\n\tPRODUCIDO "<<dato<<" EN "<<aux<<endl<<"\n\n\n";
+      pantalla.unlock();
 
    }
 }
@@ -143,13 +150,14 @@ void funcion_hebra_consumidora(  )
    for( unsigned i = 0 ; i < num_items ; i++ )
    {
       int dato ;
+      int aux;
       // Esperar a que haya hebras ocupadas
       sem_wait(ocupadas);
-      dato = vec[primera_libre - 1]; //consumimos ultimo dato en producirse
-      primera_libre --;
-      cout<<"\tLibres "<<tam_vec - (primera_libre + 1)<<" de "<<tam_vec<<endl<<flush;
+      dato = vec[primera_ocupada % tam_vec];
+      primera_ocupada ++;
+      aux = primera_ocupada;
       sem_signal(libres);
-
+      cout<<"\n\n\t\tCONSUMIDO "<<dato<<" EN "<<aux<<endl<<"\n\n\n";
       consumir_dato( dato ) ;
     }
 }
