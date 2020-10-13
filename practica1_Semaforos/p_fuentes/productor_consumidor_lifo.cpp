@@ -44,6 +44,8 @@ Semaphore libres = tam_vec ,  // tam_vec + #L - #E  , al principio tam_vec
 
 int vec[tam_vec] = {0};
 
+mutex buffer; //mutex para asegurar exclusion mutua
+
 //contadores para verificar el programa.
 unsigned  cont_prod[num_items] = {0}, // contadores de verificación: producidos
           cont_cons[num_items] = {0}; // contadores de verificación: consumidos
@@ -127,11 +129,12 @@ void  funcion_hebra_productora()
       //Paramos la hebra hasta que haya celdas libres en la cola de libres
       //del semaforo (al inicio entra siempre)
       sem_wait(libres);
+      buffer.lock(); 
       vec[primera_libre] = dato;
+      buffer.unlock();
       cout<<"\tLibres "<<tam_vec - (primera_libre + 1)<<" de "<<tam_vec<<endl<<flush;
       primera_libre ++ ;
       sem_signal(ocupadas);
-      //Incrementamos el valor de ocupadas en 1 
 
    }
 }
@@ -145,7 +148,9 @@ void funcion_hebra_consumidora(  )
       int dato ;
       // Esperar a que haya hebras ocupadas
       sem_wait(ocupadas);
+      buffer.lock();
       dato = vec[primera_libre - 1]; //consumimos ultimo dato en producirse
+      buffer.unlock();
       primera_libre --;
       cout<<"\tLibres "<<tam_vec - (primera_libre + 1)<<" de "<<tam_vec<<endl<<flush;
       sem_signal(libres);
