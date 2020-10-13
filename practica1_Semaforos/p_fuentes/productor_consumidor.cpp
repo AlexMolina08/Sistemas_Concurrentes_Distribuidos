@@ -7,7 +7,6 @@
 //
 //  Cada item producido debe ser leido ( ningún item se pierde )
 //  Ningún item se lee más de una sola vez
-//
 //  
 //  Compilar con:
 //      g++ -o bin/productor_consumidor -pthread -std=c++11 productor_consumidor.cpp Semaphore.cpp -ISemaphore
@@ -28,11 +27,11 @@ using namespace SEM ;
 
 
 const int num_items = 10 , //numero de items a generar
-          tam_vec = 5;
+          tam_vec = 5; //tam.del vector
 
 
 
-thread productor1 , consumidor1 , productor2 , consumidor2;
+thread productor1 , consumidor1 ;
 
 //Variable global que nos dice cual es la primera celda libre para producir
 //y cual es la ultima celda en la que se ha producido 
@@ -126,10 +125,10 @@ void  funcion_hebra_productora()
    {
       int dato = producir_dato() ;
       //Paramos la hebra hasta que haya celdas libres en la cola de libres
-      //del semaforo
+      //del semaforo (al inicio entra siempre)
       sem_wait(libres);
       vec[primera_libre] = dato;
-      //cout<<"\tPRODUCTOR PRODUCE"<<vec[primera_libre]<<endl<<flush;
+      cout<<"\tLibres "<<tam_vec - (primera_libre + 1)<<" de "<<tam_vec<<endl<<flush;
       primera_libre ++ ;
       sem_signal(ocupadas);
       //Incrementamos el valor de ocupadas en 1 
@@ -147,8 +146,8 @@ void funcion_hebra_consumidora(  )
       // Esperar a que haya hebras ocupadas
       sem_wait(ocupadas);
       dato = vec[primera_libre - 1]; //consumimos ultimo dato en producirse
-      //cout<<"\tCONSUMIDOR CONSUME"<<vec[primera_libre - 1]<<endl<<flush;
       primera_libre --;
+      cout<<"\tLibres "<<tam_vec - (primera_libre + 1)<<" de "<<tam_vec<<endl<<flush;
       sem_signal(libres);
 
       consumir_dato( dato ) ;

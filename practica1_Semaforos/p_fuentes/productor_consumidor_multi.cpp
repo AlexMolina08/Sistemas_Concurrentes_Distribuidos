@@ -11,8 +11,7 @@
 //
 //  
 //  Compilar con:
-//   g++ -o bin/productor_consumidor_multi -pthread 
-//   -std=c++11 productor_consumidor_multi.cpp Semaphore.cpp -ISemaphore
+//   g++ -o bin/productor_consumidor_multi -pthread  -std=c++11 productor_consumidor_multi.cpp Semaphore.cpp -ISemaphore
 //
 //
 // Historial:
@@ -32,11 +31,13 @@ using namespace SEM ;
 mutex mtx; 
 
 const int num_items = 10 , //numero de items a generar
-          tam_vec = 5;
+          tam_vec = 5 ,
+          num_productores = 3 , 
+          num_consumidores = 2;
 
-
-
-thread productor1 , consumidor1 , productor2 , consumidor2;
+//Vectores que almacenan los hilos productores y consumidores
+thread productor[num_productores] ,
+       consumidor[num_consumidores];
 
 //Variable global que nos dice cual es la primera celda libre para producir
 //y cual es la ultima celda en la que se ha producido 
@@ -86,13 +87,13 @@ int producir_dato(int productorID)
 // Funcion que consume un dato (imprimir por pantalla el dato) , 
 // simulando un tiempo aleatorio en ser consumidor
 //**********************************************************************
-void consumir_dato( unsigned dato )
+void consumir_dato( unsigned dato , int consumidorID )
 {
    assert( dato < num_items );
    cont_cons[dato] ++ ;
    this_thread::sleep_for( chrono::milliseconds( aleatorio<20,100>() ));
 
-   cout << "                  consumido: " << dato << endl ;
+   cout <<"Consumidor "<<consumidorID<<" |                  consumido: " << dato << endl ;
 
 } 
 
@@ -126,7 +127,8 @@ void test_contadores()
 
 void  funcion_hebra_productora(int productorID)
 {
-   for( unsigned i = 0 ; i < num_items / 2 ; i++ )
+   //cada productor deberá crear num_items / num_productores elementos en el vector
+   for( unsigned i = 0 ; i < num_items / num_productores ; i++ )
    {
    
       int dato = producir_dato(productorID) ;
@@ -146,35 +148,40 @@ void  funcion_hebra_productora(int productorID)
 
 //----------------------------------------------------------------------
 
-void funcion_hebra_consumidora(  )
+void funcion_hebra_consumidora(int consumidorID)
 {
-   for( unsigned i = 0 ; i < num_items ; i++ )
+   for( unsigned i = 0 ; i < num_items / num_consumidores ; i++ )
    {
       int dato ;
       // Esperar a que haya hebras ocupadas
       sem_wait(ocupadas);
       dato = vec[primera_libre - 1]; //consumimos ultimo dato en producirse
-      //cout<<"\tCONSUMIDOR CONSUME"<<vec[primera_libre - 1]<<endl<<flush;
       primera_libre --;
       sem_signal(libres);
 
-      consumir_dato( dato ) ;
+      consumir_dato( dato , consumidorID) ;
     }
 }
 //----------------------------------------------------------------------
 
 int main(){
 
-   productor1 = thread(funcion_hebra_productora , 1);
-   productor2 = thread(funcion_hebra_productora , 2);
-   consumidor1 = thread(funcion_hebra_consumidora);
 
-   productor1.join();
-   productor2.join();
-   consumidor1.join();
+   for(int i = 0 ; i < num_productores ; i++){
+      productor[i] = thread(funcion_hebra_productora , i);
+   }
+   
+   for(int i = 0 ; i < num_productores ; i++){
+      consumidor[i] = thread(funcion_hebra_consumidora , i);
+   }
+   
+   for(int i = 0 ; i < num_productores ; i++){
+      productor[i].join();
+   }
 
-
-   test_contadores();
-
+   for(int i = 0 ; i < num_productores ; i++){
+      consumidor[i].join();
+   }
+   
    return 0;
 }
