@@ -226,6 +226,22 @@ class HoareMonitor
 } ;
 
 // *****************************************************************************
+extern std::mutex mcout ;
+
+#ifdef TRAZA_M
+#define logM( msg )     \
+   {                   \
+        mcout.lock();  \
+        std::cout << msg << std::endl << std::flush ; \
+        mcout.unlock(); \
+   }
+#else
+#define logM( msg )
+#endif
+
+#define logEnt()   logM( "" << __FUNCTION__ << ": inicio (línea " << __LINE__ << ", archivo " << __FILE__ << ")" )
+
+// *****************************************************************************
 //
 // Class: MRef
 //
@@ -253,7 +269,7 @@ template<class MonClass> class MRef
    {
       assert( p_monPtr != nullptr );
       monPtr = p_monPtr ;
-      LOGM( "inicio MRef( monitor * ) " );
+      logM( "inicio MRef( monitor * )  : rc == " << monPtr->reference_count  );
    }
 
    // obtain a call proxy through the dereference operator

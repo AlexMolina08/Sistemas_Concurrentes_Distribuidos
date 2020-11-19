@@ -342,12 +342,8 @@ void register_thread_name( const std::string & name )
   const auto iter = names_map.find( ttid );
   if ( iter != names_map.end() )
   {
-      cout
-         << "error in 'register_thread_name': trying to register name '" << name
-         <<"' for a thread which was already registered with name '" << iter->second
-         << "', aborting"
-         << endl ;
-      exit(1);
+    logM("that id was already registered, with name == '" << iter->second << "', aborting");
+    exit(1);
   }
 
   // insert name
