@@ -1,0 +1,23 @@
+MPI_Comm_size( MPI_Comm comm, int *size )
+
+MPI_Comm_rank( MPI_Comm comm, int *rank )
+
+MPI_Send( void *buf_emi, int num, MPI_Datatype datatype, int dest,int tag, MPI_Comm comm )
+
+MPI_Ssend( void *buf_emi, int num, MPI_Datatype datatype, int dest,int tag, MPI_Comm comm )
+
+MPI_Recv( void *buf_rec, int num, MPI_Datatype datatype, int source,int tag, MPI_Comm comm, MPI_Status *status )
+
+MPI_Get_count( MPI_Status *status, MPI_Datatype dtype, int *num );
+	
+	**Escribe en num el nº de items recibidos en una llamada a MPI_Recv previa**
+
+
+
+
+/+++++++++++++ VARIABLES *************/
+
+MPI_Status estado; 
+
+estado.MPI_SOURCE //id del proceso que ha recibido Recv
+estado.MPI_TAG // tag del proceso que ha recibido Recv
